@@ -65,13 +65,16 @@ def api_callback():
     return redirect("cloud")
 
 def cleaned_lyrics(search_query):
+    print(search_query)
     URL = "https://search.azlyrics.com/search.php?q=" + search_query.replace(" ","+")
     page = requests.get(URL)
+    print(page)
   
     soup = BeautifulSoup(page.content, "html.parser")
     try:
         results = soup.find("table", class_="table table-condensed").find_all("a")
     except:
+        print("song not found")
         return ("")
 
     URL = results[0]["href"]
@@ -96,15 +99,11 @@ def go():
         for song in results["items"]:
             cleaned.append([song['track']['name'],song['track']['artists'][0]['name']])
         temp = []
-        print(cleaned)
         total_text = ""
         for i in cleaned:
             total_text = total_text + " " + cleaned_lyrics(i[0]+" "+i[1])
-        print("total text - ",total_text)
         counting = Counter((total_text.lower().split()))
-        print("counting - ",counting)
         most_common = (counting.most_common(25))
-        print("most common - ",most_common)
         normalised_f = []
         for i in most_common:
             normalised_f.append(i[1])
