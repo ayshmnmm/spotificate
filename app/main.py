@@ -96,7 +96,7 @@ def go():
         for song in results["items"]:
             cleaned.append([song['track']['name'],song['track']['artists'][0]['name']])
         temp = []
-        import random
+        print(cleaned)
         total_text = ""
         for i in cleaned:
             total_text = total_text + " " + cleaned_lyrics(i[0]+" "+i[1])
