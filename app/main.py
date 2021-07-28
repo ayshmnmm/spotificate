@@ -100,8 +100,11 @@ def go():
         total_text = ""
         for i in cleaned:
             total_text = total_text + " " + cleaned_lyrics(i[0]+" "+i[1])
-
-        most_common = (Counter((total_text.lower().split())).most_common(25))
+        print("total text - ",total_text)
+        counting = Counter((total_text.lower().split()))
+        print("counting - ",counting)
+        most_common = (counting.most_common(25))
+        print("most common - ",most_common)
         normalised_f = []
         for i in most_common:
             normalised_f.append(i[1])
