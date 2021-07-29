@@ -74,7 +74,10 @@ def api_callback():
     return redirect("cloud")
 
 def cleaned_lyrics(song,artist):
-    lyrics = str(genius.search_song(song,artist).lyrics).replace(u'\u200c','').strip()
+    try:
+        lyrics = str(genius.search_song(song,artist).lyrics).replace(u'\u200c','').strip()
+    except:
+        return("no lyrics")
     
     text = str(lyrics.translate(str.maketrans('', '', string.punctuation))).lower()
     text = ' '.join([word for word in text.split() if word not in stopwords_dict])
@@ -94,14 +97,13 @@ def go():
         for i in cleaned:
             total_text = total_text + cleaned_lyrics(i[0],i[1]) + " "
         counting = Counter((total_text.lower().split()))
-        most_common = (counting.most_common(35))
+        most_common = (counting.most_common(30))
         normalised_f = []
         for i in most_common:
             normalised_f.append(i[1])
         normalised_f = [((float(i)/max(normalised_f))*300)+30 for i in normalised_f]
         for i in range(len(most_common)):
             temp.append({"word":most_common[i][0],"freq":normalised_f[i]})
-        print(temp)
         
         return render_template("cloud.html",name=sp.current_user()['display_name'],data=temp)
     except Exception as e:
