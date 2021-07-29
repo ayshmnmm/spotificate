@@ -7,14 +7,18 @@ from bs4 import BeautifulSoup
 import string
 from collections import Counter
 from itertools import chain
+import lyricsgenius
+import nltk
+nltk.download('stopwords')
+from nltk.corpus import stopwords
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECKEY', 'insert random string123') # random secret key
 
 ## ------ To run locally set localrun to True and use your client id and secret ----------------
 localrun = False
-cid = os.environ.get('CLID', '') # spotify client id
-secret = os.environ.get('SECR', '') # spotify client secret
+cid = os.environ.get('CLID', 'ss') # spotify client id
+secret = os.environ.get('SECR', 'bb') # spotify client secret
 
 ## --- also ensure http://127.0.0.1:5000/callback is there in your app's redirect uris
 
@@ -48,6 +52,11 @@ else :
 SCOPE = 'user-library-read,user-read-recently-played,user-top-read'
 SHOW_DIALOG = False
 
+genius = lyricsgenius.Genius("lomao32evendthis",verbose=False)
+stop_words = stopwords.words('english')
+stopwords_dict = Counter(stop_words)
+stopwords_dict.update({'im':1,'chorus':1,'prechorus':1,'verse':1,'ive':1,'urlcopyembedcopy':1,'youre':1})
+
 @app.route("/callback")
 def api_callback():
     session.clear()
@@ -64,32 +73,13 @@ def api_callback():
     session["toke"] = res_body.get("access_token")
     return redirect("cloud")
 
-def cleaned_lyrics(search_query):
-    print(search_query)
-    URL = "https://search.azlyrics.com/search.php?q=" + search_query.replace(" ","+")
-    headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/50.0.2661.102 Safari/537.36'}
-    page = requests.get(URL,headers=headers)
-    print(page)
-  
-    soup = BeautifulSoup(page.content, "html.parser")
-    try:
-        results = soup.find("table", class_="table table-condensed").find_all("a")
-    except:
-        print("song not found")
-        return ("")
-
-    URL = results[0]["href"]
-    page = requests.get(URL)
-
-    soup = BeautifulSoup(page.content, "html.parser")
-    lyrics = ""
-
-    try:
-        lyrics = str(soup.select_one("div.col-xs-12:nth-child(2) > div:nth-child(8)").text)
-    except:
-        lyrics = str(soup.select_one("div.col-xs-12:nth-child(2) > div:nth-child(10)").text)
+def cleaned_lyrics(song,artist):
+    lyrics = str(genius.search_song(song,artist).lyrics).replace(u'\u200c','').strip()
     
-    return(lyrics.translate(str.maketrans('', '', string.punctuation)))
+    text = str(lyrics.translate(str.maketrans('', '', string.punctuation))).lower()
+    text = ' '.join([word for word in text.split() if word not in stopwords_dict])
+
+    return(text)
 
 @app.route("/cloud")
 def go():
@@ -102,13 +92,13 @@ def go():
         temp = []
         total_text = ""
         for i in cleaned:
-            total_text = total_text + " " + cleaned_lyrics(i[0]+" "+i[1])
+            total_text = total_text + cleaned_lyrics(i[0],i[1]) + " "
         counting = Counter((total_text.lower().split()))
-        most_common = (counting.most_common(25))
+        most_common = (counting.most_common(35))
         normalised_f = []
         for i in most_common:
             normalised_f.append(i[1])
-        normalised_f = [((float(i)/max(normalised_f))*300) for i in normalised_f]
+        normalised_f = [((float(i)/max(normalised_f))*300)+30 for i in normalised_f]
         for i in range(len(most_common)):
             temp.append({"word":most_common[i][0],"freq":normalised_f[i]})
         print(temp)

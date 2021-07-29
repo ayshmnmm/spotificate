@@ -2,3 +2,4 @@ Flask
 gunicorn
 spotipy
 beautifulsoup4
+nltk
