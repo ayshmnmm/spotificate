@@ -61,7 +61,7 @@ function createWordObject(word, freq) {
 function placeWord(word, x, y) {
 
     cloud.appendChild(word);
-    word.style.left = x - word.offsetWidth/2 + "px";
+    word.style.left = x - word.offsetWidth/2 + 40 + "px";
     word.style.top = y - word.offsetHeight/2 + "px";
 
     wordsDown.push(word.getBoundingClientRect());
@@ -81,7 +81,7 @@ function spiral(i, callback) {
 function intersect(word, x, y) {
     cloud.appendChild(word);    
     
-    word.style.left = x - word.offsetWidth/2 + "px";
+    word.style.left = x - word.offsetWidth/2 + 40 + "px";
     word.style.top = y - word.offsetHeight/2 + "px";
     
     var currentWord = word.getBoundingClientRect();
