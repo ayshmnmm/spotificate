@@ -101,7 +101,7 @@ def go():
         normalised_f = []
         for i in most_common:
             normalised_f.append(i[1])
-        normalised_f = [((float(i)/max(normalised_f))*300)+30 for i in normalised_f]
+        normalised_f = [((float(i)/max(normalised_f))*300)+10 for i in normalised_f]
         for i in range(len(most_common)):
             temp.append({"word":most_common[i][0],"freq":normalised_f[i]})
         
